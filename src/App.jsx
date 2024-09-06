@@ -138,7 +138,7 @@ export default function App() {
                             <Button disabled={loading} onClick={onClick}
                                     key={drop.name} variant={drop.name === selected ? 'primary' : 'light'}>
                                 {drop.img &&
-                                    <img className="me-1" width={drop.size ?? 20} src={'/' + drop.img}
+                                    <img className="me-1" width={drop.size ?? 20} src={drop.img}
                                          alt=""/>}{drop.title}
                             </Button>);
                     })}
