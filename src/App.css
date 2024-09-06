@@ -1,0 +1,27 @@
+table {
+    width: 100%;
+}
+
+td {
+    text-align: center;
+}
+
+.loader {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: transparent;
+    border-top: 2px solid blue;
+    animation: rotate 1s both infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
