@@ -60,37 +60,26 @@ export default class Hamster implements Airdrop {
     }
 
     get tasks(): Task[] {
-        let nextReward = 0;
-
-        {
-            const now = new Date();
-            const zeroDay = new Date(0);
-            const today = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), zeroDay.getHours() - zeroDay.getUTCHours()).getTime();
-            const tomorrow = new Date(today + (24 * 3600 * 1000)).getTime();
-
-            const number = Math.round((tomorrow - now.getTime()) / 1000);
-            if (number > 0)
-                nextReward = number;
-        }
-
-        const now = new Date();
-        const today = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 3);
-        const date = new Date(this.data.clickerUser.tasks.streak_days_special?.completedAt);
-
         return [
-            {id: 'reward', title: 'Daily Reward', seconds: nextReward, isDone: date.getTime() >= today.getTime()},
-            {
-                id: 'cipher',
-                title: 'Daily Cipher',
-                seconds: this.data.dailyCipher.remainSeconds,
-                isDone: this.data.dailyCipher.isClaimed,
-            },
-            {
-                id: 'combo',
-                title: 'Daily Combo',
-                seconds: this.data.dailyCombo.remainSeconds,
-                isDone: this.data.dailyCombo.isClaimed,
-            },
+            new Task('reward', 'Daily Reward', () => {
+                const now = new Date();
+                const zeroDay = new Date(0);
+                const today = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), zeroDay.getHours() - zeroDay.getUTCHours()).getTime();
+                const tomorrow = new Date(today + (24 * 3600 * 1000)).getTime();
+                const number = Math.round((tomorrow - now.getTime()) / 1000);
+                return number > 0 ? number : 0;
+            }, () => {
+                const now = new Date();
+                const today = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 3);
+                const date = new Date(this.data.clickerUser.tasks.streak_days_special?.completedAt);
+                return date.getTime() >= today.getTime();
+            }, () => {
+                // TODO: claim reward
+            }),
+            new Task('cipher', 'Daily Cipher', this.data.dailyCipher.remainSeconds, this.data.dailyCipher.isClaimed, () => {
+            }),
+            new Task('combo', 'Daily Combo', this.data.dailyCombo.remainSeconds, this.data.dailyCombo.isClaimed, () => {
+            }),
         ];
     }
 

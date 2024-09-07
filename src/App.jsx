@@ -110,10 +110,10 @@ export default function App() {
                     await instance.init(authToken);
                     instances[authToken] = instance;
                     setInstance(instance);
+                    setInfo('');
                 } catch (e) {
                     setInfo('❌ ' + e?.message ?? JSON.stringify(e));
                 }
-                setInfo('');
                 setLoading(false);
             } else {
                 setInstance(instances[authToken]);
@@ -156,6 +156,7 @@ export default function App() {
                                 <option key={token} value={token}>{name ?? 'Account ' + (i + 1)}</option>))}
                         </Form.Select>
                         <Button>⁐</Button>
+                        <Button variant="danger">X</Button>
                     </>}
                 </Stack>
 

@@ -1,8 +1,25 @@
-export interface Task {
-    id: string,
-    title: string,
-    seconds: number,
-    isDone: boolean
+export class Task {
+    id: string;
+    title: string;
+    #seconds: number | (() => number);
+    #isDone: boolean | (() => boolean);
+    claim: () => void;
+
+    constructor(id: string, title: string, seconds: number | (() => number), isDone: boolean | (() => boolean), claim: () => void) {
+        this.id = id;
+        this.title = title;
+        this.#seconds = seconds;
+        this.#isDone = isDone;
+        this.claim = claim;
+    }
+
+    get seconds() {
+        return typeof this.#seconds == 'function' ? this.#seconds() : this.#seconds;
+    }
+
+    get isDone() {
+        return typeof this.#isDone == 'function' ? this.#isDone() : this.#isDone;
+    }
 }
 
 export interface Game {
