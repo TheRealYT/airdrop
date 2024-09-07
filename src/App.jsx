@@ -1,14 +1,13 @@
-import {Button, Stack, Form, ListGroup} from 'react-bootstrap';
+import {Button, Form, ListGroup, Stack} from 'react-bootstrap';
 import {useRef, useState} from 'react';
 import Hamster from './api/Hamster';
+import {formatSeconds} from './api/util';
 
 const data = JSON.parse(localStorage.getItem('data')) ?? {};
 const instances = {};
 
-function formatSeconds(seconds) {
-    const pad = (num) => num.toString().padStart(2, '0');
-
-    return `${pad(Math.floor(seconds / 3600))}:${pad(Math.round((seconds % 3600) / 60))}`;
+function save() {
+    localStorage.setItem('data', JSON.stringify(data));
 }
 
 function addAccount(dropName, token, name) {
@@ -17,7 +16,7 @@ function addAccount(dropName, token, name) {
 
     data[dropName].push({token, name});
 
-    localStorage.setItem('data', JSON.stringify(data));
+    save();
 }
 
 function getAccounts(dropName) {
@@ -25,6 +24,20 @@ function getAccounts(dropName) {
         return data[dropName];
 
     return [];
+}
+
+function delAccount(dropName, token) {
+    if (dropName in data) {
+        const accounts = data[dropName];
+        const i = accounts.findIndex(acc => acc.token === token);
+        if (i !== -1) {
+            accounts.splice(i, 1);
+            save();
+
+            if (token in instances)
+                delete instances[token];
+        }
+    }
 }
 
 const airdrops = [
@@ -56,17 +69,18 @@ export default function App() {
     const [, setR] = useState(false); // re-render
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState(airdrops[0].name);
-    const [instance, setInstance] = useState(null);
+    const [account, setAccount] = useState('');
     const [err, setInfo] = useState('');
     const input = useRef(null);
     const drop = airdrop[selected];
     const accounts = getAccounts(drop.name);
+    const instance = instances[account];
 
     const addAcc = async () => {
         if (!input.current)
             return;
 
-        setInfo('');
+        setInfo('Loading...');
 
         const token = input.current.value ?? '';
         if (token.length < 10 || token.includes(' '))
@@ -84,7 +98,7 @@ export default function App() {
             await instance.init(token);
         } catch (e) {
             setLoading(false);
-            setInfo('❌ ' + e?.message ?? JSON.stringify(e));
+            setInfo('❌ ' + JSON.stringify(e));
             return;
         }
         setLoading(false);
@@ -97,10 +111,7 @@ export default function App() {
         setR(r => !r);
     };
 
-    const onAccountSelected = async (e) => {
-        const authToken = e.target.value;
-        setInstance(null);
-
+    async function loadInstance(authToken) {
         if (authToken !== '') {
             if (!(authToken in instances)) {
                 const instance = new airdrop[drop.name].Airdrop();
@@ -109,18 +120,45 @@ export default function App() {
                 try {
                     await instance.init(authToken);
                     instances[authToken] = instance;
-                    setInstance(instance);
                     setInfo('');
                 } catch (e) {
-                    setInfo('❌ ' + e?.message ?? JSON.stringify(e));
+                    setInfo('❌ ' + JSON.stringify(e));
                 }
                 setLoading(false);
-            } else {
-                setInstance(instances[authToken]);
             }
         }
 
         setLoading(false);
+    }
+
+    const onAccountSelected = async (e) => {
+        const authToken = e.target.value;
+        setAccount(authToken);
+
+        await loadInstance(authToken);
+    };
+
+    const doTask = async task => {
+        setLoading(true);
+        try {
+            await task.claim();
+            setInfo('');
+        } catch (e) {
+            setInfo('❌ ' + JSON.stringify(e));
+        }
+        setLoading(false);
+    };
+
+    const delAcc = () => {
+        if (account !== '' && confirm('Are you sure to delete?')) {
+            delAccount(drop.name, account);
+            setAccount('');
+        }
+    };
+
+    const refresh = async () => {
+        if (account !== '')
+            await loadInstance(account);
     };
 
     return (
@@ -131,7 +169,7 @@ export default function App() {
                     {airdrops.map(drop => {
                         const onClick = () => {
                             setSelected(drop.name);
-                            setInstance(null);
+                            setAccount('');
                         };
 
                         return (
@@ -155,8 +193,8 @@ export default function App() {
                             {accounts.map(({token, name}, i) => (
                                 <option key={token} value={token}>{name ?? 'Account ' + (i + 1)}</option>))}
                         </Form.Select>
-                        <Button>⁐</Button>
-                        <Button variant="danger">X</Button>
+                        <Button onClick={refresh}>⁐</Button>
+                        <Button variant="danger" onClick={delAcc}>X</Button>
                     </>}
                 </Stack>
 
@@ -165,7 +203,7 @@ export default function App() {
                         <span>📅 Tasks</span>
                         <ListGroup className="mt-2">
                             {instance.tasks.map(v => (
-                                <ListGroup.Item action key={v.id}>
+                                <ListGroup.Item action key={v.id} onClick={() => v.isDone ? undefined : doTask(v)}>
                                     <Stack direction="horizontal">
                                         <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
                                         <span className="ms-auto">{formatSeconds(v.seconds)}</span>

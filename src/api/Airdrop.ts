@@ -64,8 +64,11 @@ export async function $fetch(baseUrl: string, path: string, method: string, repl
         'sec-fetch-site': replaceHeaders.fetchSite,
     });
 
+    if (body != null)
+        headers['content-type'] = 'application/json';
+
     const res = await fetch(
-        `http://localhost:3000/?${urlSearchParams.toString()}`,
+        `http://${window.location.hostname}:3000/?${urlSearchParams.toString()}`,
         {
             headers,
             body: body == null ? null : JSON.stringify(body),
