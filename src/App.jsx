@@ -62,8 +62,12 @@ const airdrops = [
 
 const airdrop = Object.fromEntries(airdrops.map(drop => [drop.name, drop]));
 
-// const hamster = new Hamster();
-// hamster.init("17217134813505csR9OCW0DU46WidYVzTBCc1Dtl1wxadDcbMjPdBeOmy6PEZuYwfPGb5JPyfaZkh6249776586")
+function parseErr(e) {
+    if (typeof e?.message == 'string')
+        return e.message;
+
+    return JSON.stringify(e);
+}
 
 export default function App() {
     const [, setR] = useState(false); // re-render
@@ -98,7 +102,7 @@ export default function App() {
             await instance.init(token);
         } catch (e) {
             setLoading(false);
-            setInfo('❌ ' + JSON.stringify(e));
+            setInfo('❌ ' + parseErr(e));
             return;
         }
         setLoading(false);
@@ -122,7 +126,7 @@ export default function App() {
                     instances[authToken] = instance;
                     setInfo('');
                 } catch (e) {
-                    setInfo('❌ ' + JSON.stringify(e));
+                    setInfo('❌ ' + parseErr(e));
                 }
                 setLoading(false);
             }
@@ -144,7 +148,7 @@ export default function App() {
             await task.claim();
             setInfo('');
         } catch (e) {
-            setInfo('❌ ' + JSON.stringify(e));
+            setInfo('❌ ' + parseErr(e));
         }
         setLoading(false);
     };
