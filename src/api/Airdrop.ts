@@ -62,7 +62,7 @@ export async function $fetch(baseUrl: string, path: string, method: string, repl
         headers['content-type'] = 'application/json';
 
     const res = await fetch(
-        `http://${window.location.hostname}:3000/?${urlSearchParams.toString()}`,
+        `https://airdrop-proxy.deno.dev/?${urlSearchParams.toString()}`,
         {
             headers,
             body: body == null ? null : JSON.stringify(body),
