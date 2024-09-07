@@ -115,9 +115,9 @@ export default function App() {
         setR(r => !r);
     };
 
-    async function loadInstance(authToken) {
+    async function loadInstance(authToken, forceReload = false) {
         if (authToken !== '') {
-            if (!(authToken in instances)) {
+            if (forceReload || !(authToken in instances)) {
                 const instance = new airdrop[drop.name].Airdrop();
                 setLoading(true);
                 setInfo('Loading...');
@@ -194,7 +194,7 @@ export default function App() {
                     <Form.Select onChange={onAccountSelected} disabled={loading}>
                         <option></option>
                         {accounts.map(({token, name}, i) => (
-                            <option key={token} value={token}>{name ?? 'Account ' + (i + 1)}</option>))}
+                            <option key={token} value={token}>{(i + 1) + ' ' + name ?? 'Account ' + (i + 1)}</option>))}
                     </Form.Select>
                     <Button onClick={refresh}>⁐</Button>
                     <Button variant="danger" onClick={delAcc}>X</Button>
