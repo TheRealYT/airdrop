@@ -162,7 +162,7 @@ export default function App() {
 
     const refresh = async () => {
         if (account !== '')
-            await loadInstance(account);
+            await loadInstance(account, true);
     };
 
     return (
