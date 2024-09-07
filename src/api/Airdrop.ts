@@ -41,17 +41,11 @@ export default interface Airdrop {
 
     get user(): string;
 
-    get points(): number;
-
-    get profit(): number;
+    get summary(): string[];
 
     get tasks(): Task[];
 
     get games(): Game[];
-
-    claimTask(taskId: string): boolean;
-
-    playGame(gameId: string): boolean;
 }
 
 export async function $fetch(baseUrl: string, path: string, method: string, replaceHeaders: {

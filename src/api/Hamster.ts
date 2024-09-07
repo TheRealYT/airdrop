@@ -44,20 +44,12 @@ export default class Hamster implements Airdrop {
         return user ? `${user.firstName} @${user.username}` : `${this.data.accountInfo.name} (Unknown)`;
     }
 
-    claimTask(taskId: string): boolean {
-        return false;
-    }
+    get summary(): string[] {
+        const level = this.data.clickerUser.level;
+        const profit = new Intl.NumberFormat().format(this.data.clickerUser.earnPassivePerHour);
+        const coin = new Intl.NumberFormat().format(Math.round(this.data.clickerUser.balanceCoins));
 
-    playGame(gameId: string): boolean {
-        return false;
-    }
-
-    get points(): number {
-        return 0;
-    }
-
-    get profit(): number {
-        return 0;
+        return [`🤵 Level ${level}`, `💰 ${coin}`, `🪙 +${profit}(hr)`, `🔑 ${this.data.clickerUser.balanceKeys}`];
     }
 
     get tasks(): Task[] {

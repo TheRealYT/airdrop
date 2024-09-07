@@ -186,31 +186,43 @@ export default function App() {
             <div className="overflow-y-auto flex-grow-1">
                 {accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`}
 
-                <Stack direction="horizontal" gap={2} className="mt-2">
-                    {accounts.length > 0 && <>
-                        <Form.Select onChange={onAccountSelected} disabled={loading}>
-                            <option></option>
-                            {accounts.map(({token, name}, i) => (
-                                <option key={token} value={token}>{name ?? 'Account ' + (i + 1)}</option>))}
-                        </Form.Select>
-                        <Button onClick={refresh}>⁐</Button>
-                        <Button variant="danger" onClick={delAcc}>X</Button>
-                    </>}
-                </Stack>
+                {accounts.length > 0 && <Stack direction="horizontal" gap={2} className="mt-2">
+                    <Form.Select onChange={onAccountSelected} disabled={loading}>
+                        <option></option>
+                        {accounts.map(({token, name}, i) => (
+                            <option key={token} value={token}>{name ?? 'Account ' + (i + 1)}</option>))}
+                    </Form.Select>
+                    <Button onClick={refresh}>⁐</Button>
+                    <Button variant="danger" onClick={delAcc}>X</Button>
+                </Stack>}
 
                 {instance &&
-                    <div className="mt-3">
-                        <span>📅 Tasks</span>
-                        <ListGroup className="mt-2">
-                            {instance.tasks.map(v => (
-                                <ListGroup.Item action key={v.id} onClick={() => v.isDone ? undefined : doTask(v)}>
-                                    <Stack direction="horizontal">
-                                        <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
-                                        <span className="ms-auto">{formatSeconds(v.seconds)}</span>
-                                    </Stack>
-                                </ListGroup.Item>))}
-                        </ListGroup>
-                    </div>
+                    <>
+                        <div className="mt-3">
+                            <div className="mt-2">📃 Summary</div>
+                            <ListGroup className="mt-2">
+                                {instance.summary.map(v => (
+                                    <ListGroup.Item key={v}>
+                                        <Stack direction="horizontal">
+                                            {v}
+                                        </Stack>
+                                    </ListGroup.Item>))}
+                            </ListGroup>
+                        </div>
+
+                        <div className="mt-3">
+                            <div className="mt-2">📅 Tasks</div>
+                            <ListGroup className="mt-2">
+                                {instance.tasks.map(v => (
+                                    <ListGroup.Item action key={v.id} onClick={() => v.isDone ? undefined : doTask(v)}>
+                                        <Stack direction="horizontal">
+                                            <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
+                                            <span className="ms-auto">{formatSeconds(v.seconds)}</span>
+                                        </Stack>
+                                    </ListGroup.Item>))}
+                            </ListGroup>
+                        </div>
+                    </>
                 }
             </div>
 
