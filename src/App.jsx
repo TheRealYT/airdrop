@@ -84,8 +84,6 @@ export default function App() {
         if (!input.current)
             return;
 
-        setInfo('Loading...');
-
         const token = input.current.value ?? '';
         if (token.length < 10 || token.includes(' '))
             return setInfo('❌ Invalid token');
@@ -99,16 +97,16 @@ export default function App() {
         const instance = new airdrop[drop.name].Airdrop();
         setLoading(true);
         try {
-            await instance.init(token);
+            await instance.init(token, setInfo);
         } catch (e) {
             setLoading(false);
             setInfo('❌ ' + parseErr(e));
             return;
         }
         setLoading(false);
-        instances[token] = instance;
+        instances[instance.authToken] = instance;
 
-        addAccount(drop.name, token, instance.user);
+        addAccount(drop.name, instance.authToken, instance.user);
         input.current.value = '';
 
         setInfo('');
@@ -120,9 +118,8 @@ export default function App() {
             if (forceReload || !(authToken in instances)) {
                 const instance = new airdrop[drop.name].Airdrop();
                 setLoading(true);
-                setInfo('Loading...');
                 try {
-                    await instance.init(authToken);
+                    await instance.init(authToken, setInfo);
                     instances[authToken] = instance;
                     setInfo('');
                 } catch (e) {
@@ -144,6 +141,7 @@ export default function App() {
 
     const doTask = async task => {
         setLoading(true);
+        setInfo(`Claiming ${task.name}`);
         try {
             await task.claim();
             setInfo('');
@@ -233,7 +231,7 @@ export default function App() {
 
             <Stack direction="horizontal">
                 <Stack direction="vertical">
-                    <p className="mb-2">{err}</p>
+                    <p className="mb-2 pt-2">{err}</p>
                     <Form.Control disabled={loading} ref={input} placeholder="Auth Token or URL" className="mb-2"/>
                     <Button disabled={loading} onClick={addAcc}>Add</Button>
                 </Stack>

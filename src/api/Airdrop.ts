@@ -35,7 +35,7 @@ export default interface Airdrop {
     authToken: string;
     data: any;
 
-    init(authToken: string): Promise<void>;
+    init(authToken: string, statusUpdate?: (info: string) => void): Promise<void>;
 
     get name(): string;
 

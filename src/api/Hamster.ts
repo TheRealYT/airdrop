@@ -8,7 +8,7 @@ export default class Hamster implements Airdrop {
     authToken: string;
     data: any = {};
 
-    async init(authToken: string) {
+    async init(authToken: string, statusUpdate: (info: string) => void = () => undefined) {
         const newHeaders = {
             fetchSite: 'same-origin',
             referer: 'https://hamsterkombatgame.io/',
@@ -21,6 +21,8 @@ export default class Hamster implements Airdrop {
 
             const decoded = urlParseHashParams(url.hash);
 
+            statusUpdate('Getting auth token by url...');
+
             const data = await $fetch(this.baseUrl, 'auth/auth-by-telegram-webapp', 'POST', newHeaders, {}, {
                 initDataRaw: decoded['tgWebAppData'],
                 fingerprint: fingerprint(),
@@ -28,13 +30,18 @@ export default class Hamster implements Airdrop {
 
             if ('authToken' in data)
                 authToken = data.authToken;
-        } else this.authToken = authToken;
+        }
+
+        this.authToken = authToken;
 
         const headers = {Authorization: `Bearer ${authToken}`};
 
+        statusUpdate('Initializing...');
         await $fetch(this.baseUrl, 'ip', 'GET', newHeaders, headers);
+        statusUpdate('Getting account info...');
         Object.assign(this.data, await $fetch(this.baseUrl, 'auth/account-info', 'POST', newHeaders, headers));
 
+        statusUpdate('Getting game info...');
         const [resBody, resHeaders] = await $fetch(this.baseUrl, 'clicker/sync', 'POST', newHeaders, headers, null, true);
         Object.assign(this.data, resBody);
 
