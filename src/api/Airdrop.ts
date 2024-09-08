@@ -77,7 +77,7 @@ export async function $fetch(baseUrl: string, path: string, method: string, repl
         return await res.json();
     }
 
-    const data = res.text();
+    const data = await res.text();
 
     throw `${res.status} ${res.statusText}\n${data}`;
 }

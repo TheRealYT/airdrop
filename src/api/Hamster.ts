@@ -74,7 +74,7 @@ export default class Hamster implements Airdrop {
                     referer: 'https://hamsterkombatgame.io/',
                 };
 
-                Object.assign(this.data, await $fetch(this.baseUrl, 'clicker/check-tasks', 'POST', newHeaders, headers, {
+                Object.assign(this.data, await $fetch(this.baseUrl, 'clicker/check-task', 'POST', newHeaders, headers, {
                     taskId: 'streak_days_special',
                 }));
             }),
