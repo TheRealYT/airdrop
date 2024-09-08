@@ -188,7 +188,7 @@ export default function App() {
             </div>
 
             <div className="overflow-y-auto flex-grow-1">
-                {accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`}
+                {drop.Airdrop ? (accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`) : '😃 Coming soon'}
 
                 {accounts.length > 0 && <Stack direction="horizontal" gap={2} className="mt-2">
                     <Form.Select onChange={onAccountSelected} disabled={loading}>
@@ -196,8 +196,8 @@ export default function App() {
                         {accounts.map(({token, name}, i) => (
                             <option key={token} value={token}>{(i + 1) + ' ' + name ?? 'Account ' + (i + 1)}</option>))}
                     </Form.Select>
-                    <Button onClick={refresh}>⁐</Button>
-                    <Button variant="danger" onClick={delAcc}>X</Button>
+                    <Button disabled={loading} onClick={refresh}>⁐</Button>
+                    <Button disabled={loading} variant="danger" onClick={delAcc}>X</Button>
                 </Stack>}
 
                 {instance &&
@@ -218,7 +218,8 @@ export default function App() {
                             <div className="mt-2">📅 Tasks</div>
                             <ListGroup className="mt-2">
                                 {instance.tasks.map(v => (
-                                    <ListGroup.Item action key={v.id} onClick={() => v.isDone ? undefined : doTask(v)}>
+                                    <ListGroup.Item action key={v.id}
+                                                    onClick={() => loading || v.isDone ? undefined : doTask(v)}>
                                         <Stack direction="horizontal">
                                             <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
                                             <span className="ms-auto">{formatSeconds(v.seconds)}</span>
@@ -233,7 +234,7 @@ export default function App() {
             <Stack direction="horizontal">
                 <Stack direction="vertical">
                     <p className="mb-2">{err}</p>
-                    <Form.Control disabled={loading} ref={input} placeholder="Auth Token" className="mb-2"/>
+                    <Form.Control disabled={loading} ref={input} placeholder="Auth Token or URL" className="mb-2"/>
                     <Button disabled={loading} onClick={addAcc}>Add</Button>
                 </Stack>
             </Stack>
