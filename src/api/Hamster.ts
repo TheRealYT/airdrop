@@ -1,5 +1,6 @@
 import Airdrop, {$fetch, Game, Task} from './Airdrop';
-import {formatSeconds} from './util';
+import {formatSeconds, urlParseHashParams} from './util';
+import {fingerprint} from './fingerprint';
 
 export default class Hamster implements Airdrop {
     loaded = false;
@@ -8,12 +9,28 @@ export default class Hamster implements Airdrop {
     data: any = {};
 
     async init(authToken: string) {
-        this.authToken = authToken;
-        const headers = {Authorization: `Bearer ${authToken}`};
         const newHeaders = {
             fetchSite: 'same-origin',
             referer: 'https://hamsterkombatgame.io/',
         };
+
+        if (authToken.startsWith('https')) {
+            const url = new URL(authToken);
+            if (url.origin !== 'https://hamsterkombatgame.io' && url.origin !== 'https://hamsterkombat.io')
+                throw new Error('Invalid url');
+
+            const decoded = urlParseHashParams(url.hash);
+
+            const data = await $fetch(this.baseUrl, 'auth/auth-by-telegram-webapp', 'POST', newHeaders, {}, {
+                initDataRaw: decoded['tgWebAppData'],
+                fingerprint: fingerprint(),
+            });
+
+            if ('authToken' in data)
+                authToken = data.authToken;
+        } else this.authToken = authToken;
+
+        const headers = {Authorization: `Bearer ${authToken}`};
 
         await $fetch(this.baseUrl, 'ip', 'GET', newHeaders, headers);
         Object.assign(this.data, await $fetch(this.baseUrl, 'auth/account-info', 'POST', newHeaders, headers));
