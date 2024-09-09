@@ -231,7 +231,8 @@ export default function App() {
 
             <Stack direction="horizontal">
                 <Stack direction="vertical">
-                    <p className="mb-2 pt-2">{err}</p>
+                    <p className="mb-2 pt-2 d-flex align-items-center">{loading &&
+                        <img className="me-1" width={20} src="loading.svg" alt=""/>} &nbsp;{err}</p>
                     <Form.Control disabled={loading} ref={input} placeholder="Auth Token or URL" className="mb-2"/>
                     <Button disabled={loading} onClick={addAcc}>Add</Button>
                 </Stack>
