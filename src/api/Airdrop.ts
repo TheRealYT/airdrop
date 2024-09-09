@@ -33,6 +33,7 @@ export default interface Airdrop {
     loaded: boolean;
     baseUrl: string;
     authToken: string;
+    authUrl?: string;
     data: any;
 
     init(authToken: string, statusUpdate?: (info: string) => void): Promise<void>;
@@ -83,5 +84,5 @@ export async function $fetch(baseUrl: string, path: string, method: string, repl
 
     const data = await res.text();
 
-    throw `${res.status} ${res.statusText}\n${data}`;
+    throw `${res.status} ${res.statusText} ${data}`;
 }

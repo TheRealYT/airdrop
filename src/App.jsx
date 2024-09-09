@@ -2,6 +2,7 @@ import {Button, Form, ListGroup, Stack} from 'react-bootstrap';
 import {useRef, useState} from 'react';
 import Hamster from './api/Hamster';
 import {formatSeconds} from './api/util';
+import Major from './api/Major';
 
 const data = JSON.parse(localStorage.getItem('data')) ?? {};
 const instances = {};
@@ -10,11 +11,11 @@ function save() {
     localStorage.setItem('data', JSON.stringify(data));
 }
 
-function addAccount(dropName, token, name) {
+function addAccount(dropName, token, name, extra = {}) {
     if (!(dropName in data))
         data[dropName] = [];
 
-    data[dropName].push({token, name});
+    data[dropName].push({token, name, ...extra});
 
     save();
 }
@@ -52,6 +53,8 @@ const airdrops = [
         img: 'major.svg',
         name: 'major',
         title: 'Major',
+        Airdrop: Major,
+        tokenAuth: false,
     },
     {
         img: 'blum.svg',
@@ -84,12 +87,12 @@ export default function App() {
         if (!input.current)
             return;
 
-        const token = input.current.value ?? '';
+        const token = (input.current.value ?? '').trim();
         if (token.length < 10 || token.includes(' '))
             return setInfo('❌ Invalid token');
 
         if (getAccounts(drop.name).find(v => v.token === token))
-            return setInfo('❌ Token already added');
+            return setInfo('❌ User already added');
 
         if (!airdrop[drop.name].Airdrop)
             return setInfo(`❌ Sorry :(, ${drop.title} has no implementation`);
@@ -106,7 +109,7 @@ export default function App() {
         setLoading(false);
         instances[instance.authToken] = instance;
 
-        addAccount(drop.name, instance.authToken, instance.user);
+        addAccount(drop.name, instance.authToken, instance.user, drop.tokenAuth === false ? {authUrl: instance.authUrl} : undefined);
         input.current.value = '';
 
         setInfo('');
@@ -116,10 +119,10 @@ export default function App() {
     async function loadInstance(authToken, forceReload = false) {
         if (authToken !== '') {
             if (forceReload || !(authToken in instances)) {
-                const instance = new airdrop[drop.name].Airdrop();
+                const instance = !(authToken in instances) ? new airdrop[drop.name].Airdrop() : instances[authToken];
                 setLoading(true);
                 try {
-                    await instance.init(authToken, setInfo);
+                    await instance.init(drop.tokenAuth === false && !instance.loaded ? accounts.find(a => a.token === authToken)?.authUrl : authToken, setInfo);
                     instances[authToken] = instance;
                     setInfo('');
                 } catch (e) {
@@ -165,7 +168,7 @@ export default function App() {
 
     return (
         <>
-            <div className="mb-2 w-100 overflow-y-auto" style={{flex: 'none'}}>
+            <div className="w-100 overflow-y-auto topBar" style={{flex: 'none'}}>
                 <Stack direction="horizontal" className="mb-2 px-2" style={{width: 'max-content'}}
                        gap={2}>
                     {airdrops.map(drop => {
@@ -185,7 +188,7 @@ export default function App() {
                 </Stack>
             </div>
 
-            <div className="overflow-y-auto flex-grow-1">
+            <div className="pt-2 overflow-y-auto flex-grow-1">
                 {drop.Airdrop ? (accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`) : '😃 Coming soon'}
 
                 {accounts.length > 0 && <Stack direction="horizontal" gap={2} className="mt-2">
@@ -220,9 +223,17 @@ export default function App() {
                                                     onClick={() => loading || v.isDone ? undefined : doTask(v)}>
                                         <Stack direction="horizontal">
                                             <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
-                                            <span className="ms-auto">{formatSeconds(v.seconds)}</span>
+                                            {v.seconds !== -1 &&
+                                                <span className="ms-auto">{formatSeconds(v.seconds)}</span>}
                                         </Stack>
                                     </ListGroup.Item>))}
+                            </ListGroup>
+                        </div>
+
+                        <div className="my-3">
+                            <div className="mt-2">🎮 Games</div>
+                            <ListGroup className="mt-2">
+                                    <ListGroup.Item>😃 Coming soon</ListGroup.Item>
                             </ListGroup>
                         </div>
                     </>
@@ -231,8 +242,11 @@ export default function App() {
 
             <Stack direction="horizontal">
                 <Stack direction="vertical">
-                    <p className="mb-2 pt-2">{err}</p>
-                    <Form.Control disabled={loading} ref={input} placeholder="Auth Token or URL" className="mb-2"/>
+                    <p className="msg mb-2 pt-2 d-flex align-items-center">{loading &&
+                        <><img className="me-1" width={20} src="loading.svg" alt=""/>&nbsp;</>} {err}</p>
+                    <Form.Control disabled={loading} ref={input}
+                                  placeholder={(drop.tokenAuth === false ? '' : 'Auth Token or ') + 'URL'}
+                                  className="mb-2"/>
                     <Button disabled={loading} onClick={addAcc}>Add</Button>
                 </Stack>
             </Stack>
