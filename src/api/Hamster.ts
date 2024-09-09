@@ -5,6 +5,7 @@ import {fingerprint} from './fingerprint';
 export default class Hamster implements Airdrop {
     loaded = false;
     baseUrl = 'https://api.hamsterkombatgame.io';
+    // @ts-ignore
     authToken: string;
     data: any = {};
 
@@ -19,7 +20,7 @@ export default class Hamster implements Airdrop {
             if (url.origin !== 'https://hamsterkombatgame.io' && url.origin !== 'https://hamsterkombat.io')
                 throw new Error('Invalid url');
 
-            const decoded = urlParseHashParams(url.hash);
+            const decoded = urlParseHashParams(url.hash) as any;
 
             statusUpdate('Getting auth token by url...');
 
@@ -114,7 +115,7 @@ export default class Hamster implements Airdrop {
                     cipher: this.getCipher(),
                 }));
             }),
-            new Task('combo', `Daily Combo - ${this.data.dailyCombo.upgradeIds?.join(', ')}`, this.data.dailyCombo.remainSeconds, this.data.dailyCombo.isClaimed, async () => {
+            new Task('combo', `Daily Combo - ${this.data.dailyCombo.upgradeIds?.join(', ')}`, this.data.dailyCombo.remainSeconds, this.data.dailyCombo.isClaimed, async (statusUpdate) => {
                 if (this.data.dailyCombo.upgradeIds?.length === 3) {
                     const headers = {Authorization: `Bearer ${this.authToken}`};
                     const newHeaders = {
@@ -147,7 +148,7 @@ export default class Hamster implements Airdrop {
                 for (let i1 = 0; i1 < updates.length; i1++) {
                     const update = updates[i1];
                     for (let i = 0; i < update.length; i++) {
-                        const combo = update[i];
+                        const combo = update[i] as any;
                         const format = new Intl.NumberFormat().format;
 
                         const price = format(combo.price);
@@ -163,13 +164,16 @@ export default class Hamster implements Airdrop {
                 if (confirm(str)) {
                     let str = '';
                     for (const update of updates)
-                        for (const combo of update.toReversed()) {
+                        for (const combo of update.slice().reverse() as any[]) {
                             while (true) {
                                 try {
                                     await this.buyUpdate(combo.id);
                                     combo.level++;
 
-                                    str += `✅ Level up ${combo.level}/${combo.levelUp ?? '-'} ${combo.name}\n`;
+                                    const str1 = `✅ Level up ${combo.level}/${combo.levelUp ?? '-'} ${combo.name}\n`;
+                                    statusUpdate && statusUpdate(str1);
+
+                                    str += str1;
 
                                     if (!combo.levelUp || combo.level >= combo.levelUp)
                                         break;
@@ -183,6 +187,7 @@ export default class Hamster implements Airdrop {
                                         await new Promise(res => setTimeout(res, 2000));
                                     }
                                 } catch (e) {
+                                    // @ts-ignore
                                     str += `❌ ${combo.name} - error ${typeof e?.message == 'string' ? e.message : 'can\'t buy'}\n`;
                                     break;
                                 }
@@ -200,11 +205,11 @@ export default class Hamster implements Airdrop {
         return [];
     }
 
-    private getUpdateWithCondition(updateId) {
+    private getUpdateWithCondition(updateId: string) {
         const all = Array.from(this.data.upgradesForBuy);
         const tree = [];
 
-        let update = all.find(v => v.id.toLowerCase() === updateId.toLowerCase() || v.id.toLowerCase().includes(updateId.toLowerCase()) || v.name.toLowerCase().includes(updateId.toLowerCase()));
+        let update = all.find((v: any) => v.id.toLowerCase() === updateId.toLowerCase() || v.id.toLowerCase().includes(updateId.toLowerCase()) || v.name.toLowerCase().includes(updateId.toLowerCase())) as any;
         while (update != null) {
             update.level = this.data.clickerUser.upgrades?.[update.id]?.level ?? update.level;
             tree.push(update);
@@ -212,7 +217,7 @@ export default class Hamster implements Airdrop {
             if (update.condition == null || update.condition._type !== 'ByUpgrade')
                 break;
 
-            const newUpdate = all.find(v => v.id === update.condition.upgradeId);
+            const newUpdate = all.find((v: any) => v.id === update.condition.upgradeId) as any;
             newUpdate.level = this.data.clickerUser.upgrades?.[newUpdate.id]?.level ?? newUpdate.level;
 
             if (newUpdate.level >= update.condition.level)
@@ -225,11 +230,11 @@ export default class Hamster implements Airdrop {
         return tree;
     }
 
-    private mark(v) {
-        return v === true ? '✅' : '❌';
+    private mark(v: boolean) {
+        return v ? '✅' : '❌';
     }
 
-    private async buyUpdate(updateId) {
+    private async buyUpdate(updateId: string) {
         const headers = {Authorization: `Bearer ${this.authToken}`};
         const newHeaders = {
             accept: 'application/json',

@@ -141,7 +141,7 @@ export default function App() {
 
     const doTask = async task => {
         setLoading(true);
-        setInfo(`Claiming ${task.name}`);
+        setInfo(`Claiming ${task.title}`);
         try {
             await task.claim();
             setInfo('');

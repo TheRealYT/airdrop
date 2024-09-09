@@ -3,9 +3,9 @@ export class Task {
     title: string;
     #seconds: number | (() => number);
     #isDone: boolean | (() => boolean);
-    claim: () => void;
+    claim: (statusUpdate?: (info: string) => void) => void;
 
-    constructor(id: string, title: string, seconds: number | (() => number), isDone: boolean | (() => boolean), claim: () => void) {
+    constructor(id: string, title: string, seconds: number | (() => number), isDone: boolean | (() => boolean), claim: (statusUpdate?: (info: string) => void) => void) {
         this.id = id;
         this.title = title;
         this.#seconds = seconds;
@@ -51,18 +51,22 @@ export default interface Airdrop {
 export async function $fetch(baseUrl: string, path: string, method: string, replaceHeaders: {
     fetchSite: 'same-site' | 'same-origin' | string;
     referer: string;
-}, headers: {}, body = null, getHeaders = false) {
+}, headers: {}, body: {} | null = null, getHeaders = false) {
     const urlSearchParams = new URLSearchParams({
         url: baseUrl + '/' + path,
         referer: replaceHeaders.referer,
         'sec-fetch-site': replaceHeaders.fetchSite,
     });
 
-    if (body != null)
+    if (body != null) {
+        // @ts-ignore
         headers['content-type'] = 'application/json';
+    }
+
+    const proxyUrl = location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://airdrop-proxy.deno.dev';
 
     const res = await fetch(
-        `https://airdrop-proxy.deno.dev/?${urlSearchParams.toString()}`,
+        `${proxyUrl}/?${urlSearchParams.toString()}`,
         {
             headers,
             body: body == null ? null : JSON.stringify(body),
