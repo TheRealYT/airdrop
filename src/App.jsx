@@ -208,7 +208,7 @@ export default function App() {
                     <Form.Select onChange={onAccountSelected} disabled={loading}>
                         <option></option>
                         {accounts.map(({token, name}, i) => (
-                            <option key={token} value={token}>{(i + 1) + ' ' + name ?? 'Account ' + (i + 1)}</option>))}
+                            <option key={token} value={token}>{(i + 1) + ' ' + name}</option>))}
                     </Form.Select>
                     <Button disabled={loading} onClick={refresh}>⁐</Button>
                     <Button disabled={loading} variant="danger" onClick={delAcc}>X</Button>
