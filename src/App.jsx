@@ -8,6 +8,9 @@ const data = JSON.parse(localStorage.getItem('data')) ?? {};
 const instances = {};
 
 function isNew(dropName, currentDropName) {
+    if (!dropName)
+        return false;
+
     const drop = localStorage.getItem(dropName);
 
     if (currentDropName === dropName) {
@@ -195,7 +198,7 @@ export default function App() {
                                 {d.img &&
                                     <img className="me-1" width={d.size ?? 20} src={d.img}
                                          alt=""/>}{d.title}
-                                {isNew(d.name, drop.name) && <span className="text-danger ms-1">●</span>}
+                                {isNew(d.Airdrop && d.name, drop.name) && <span className="text-danger ms-1">●</span>}
                             </Button>);
                     })}
                 </Stack>
