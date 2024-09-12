@@ -7,6 +7,18 @@ import Major from './api/Major';
 const data = JSON.parse(localStorage.getItem('data')) ?? {};
 const instances = {};
 
+function isNew(dropName, currentDropName) {
+    const drop = localStorage.getItem(dropName);
+
+    if (currentDropName === dropName) {
+        if (!drop)
+            localStorage.setItem(dropName, '1');
+        return false;
+    }
+
+    return !drop;
+}
+
 function save() {
     localStorage.setItem('data', JSON.stringify(data));
 }
@@ -171,18 +183,19 @@ export default function App() {
             <div className="w-100 overflow-y-auto topBar" style={{flex: 'none'}}>
                 <Stack direction="horizontal" className="mb-2 px-2" style={{width: 'max-content'}}
                        gap={2}>
-                    {airdrops.map(drop => {
+                    {airdrops.map(d => {
                         const onClick = () => {
-                            setSelected(drop.name);
+                            setSelected(d.name);
                             setAccount('');
                         };
 
                         return (
                             <Button disabled={loading} onClick={onClick}
-                                    key={drop.name} variant={drop.name === selected ? 'primary' : 'light'}>
-                                {drop.img &&
-                                    <img className="me-1" width={drop.size ?? 20} src={drop.img}
-                                         alt=""/>}{drop.title}
+                                    key={d.name} variant={d.name === selected ? 'primary' : 'light'}>
+                                {d.img &&
+                                    <img className="me-1" width={d.size ?? 20} src={d.img}
+                                         alt=""/>}{d.title}
+                                {isNew(d.name, drop.name) && <span className="text-danger ms-1">●</span>}
                             </Button>);
                     })}
                 </Stack>
@@ -233,7 +246,7 @@ export default function App() {
                         <div className="my-3">
                             <div className="mt-2">🎮 Games</div>
                             <ListGroup className="mt-2">
-                                    <ListGroup.Item>😃 Coming soon</ListGroup.Item>
+                                <ListGroup.Item>😃 Coming soon</ListGroup.Item>
                             </ListGroup>
                         </div>
                     </>

@@ -22,7 +22,7 @@ export default class Major implements Airdrop {
         if (!this.loaded) {
             if (authToken.startsWith('https')) {
                 const url = new URL(authToken);
-                if (url.origin !== this.baseUrl)
+                if (url.origin !== this.baseUrl && url.origin !== 'https://major.glados.app')
                     throw new Error('Invalid url');
 
                 const decoded = urlParseHashParams(url.hash) as any;
