@@ -9,10 +9,6 @@ export default class Major implements Airdrop {
     authToken: string;
     authUrl?: string;
 
-    get games(): Game[] {
-        return [];
-    }
-
     async init(authToken: string, statusUpdate: (info: string) => void = () => null) {
         const newHeaders = {
             fetchSite: 'same-origin',
@@ -66,14 +62,12 @@ export default class Major implements Airdrop {
         }
     }
 
-    private async loadTasks(newHeaders: { referer: string; fetchSite: string }, headers: { Authorization: string }) {
-        this.data.tasks = [];
-        this.data.tasks.push(...await $fetch(this.baseUrl, 'api/tasks/?is_daily=false', 'GET', newHeaders, headers));
-        this.data.tasks.push(...await $fetch(this.baseUrl, 'api/tasks/?is_daily=true', 'GET', newHeaders, headers));
-    }
-
     get name(): string {
         return 'Major';
+    }
+
+    get user(): string {
+        return `${this.data.first_name} @${this.data.username}`;
     }
 
     get summary(): string[] {
@@ -114,7 +108,13 @@ export default class Major implements Airdrop {
         });
     }
 
-    get user(): string {
-        return `${this.data.first_name} @${this.data.username}`;
+    get games(): Game[] {
+        return [];
+    }
+
+    private async loadTasks(newHeaders: { referer: string; fetchSite: string }, headers: { Authorization: string }) {
+        this.data.tasks = [];
+        this.data.tasks.push(...await $fetch(this.baseUrl, 'api/tasks/?is_daily=false', 'GET', newHeaders, headers));
+        this.data.tasks.push(...await $fetch(this.baseUrl, 'api/tasks/?is_daily=true', 'GET', newHeaders, headers));
     }
 }

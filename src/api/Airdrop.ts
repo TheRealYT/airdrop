@@ -22,13 +22,6 @@ export class Task {
     }
 }
 
-export interface Game {
-    id: string,
-    title: string,
-    seconds: number,
-    isDone: boolean
-}
-
 export default interface Airdrop {
     loaded: boolean;
     baseUrl: string;
@@ -46,7 +39,7 @@ export default interface Airdrop {
 
     get tasks(): Task[];
 
-    get games(): Game[];
+    get games(): Task[];
 }
 
 export async function $fetch(baseUrl: string, path: string, method: string, replaceHeaders: {
