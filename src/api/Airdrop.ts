@@ -45,7 +45,7 @@ export default interface Airdrop {
 export async function $fetch(baseUrl: string, path: string, method: string, replaceHeaders: {
     fetchSite: 'same-site' | 'same-origin' | string;
     referer: string;
-}, headers: {}, body: {} | null = null, getHeaders = false) {
+}, headers: {}, body: {} | null = null, getHeaders = false, ignoreOk = false) {
     const urlSearchParams = new URLSearchParams({
         url: baseUrl + '/' + path,
         referer: replaceHeaders.referer,
@@ -68,7 +68,7 @@ export async function $fetch(baseUrl: string, path: string, method: string, repl
         },
     );
 
-    if (res.ok) {
+    if (res.ok || ignoreOk) {
         if (getHeaders)
             return [await res.json(), res.headers];
 

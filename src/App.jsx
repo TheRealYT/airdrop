@@ -1,4 +1,4 @@
-import {Button, Form, ListGroup, Stack} from 'react-bootstrap';
+import {Button, Form, ListGroup, Spinner, Stack} from 'react-bootstrap';
 import {useRef, useState} from 'react';
 import Hamster from './api/Hamster';
 import {formatSeconds} from './api/util';
@@ -96,6 +96,7 @@ export default function App() {
     const input = useRef(null);
     const drop = airdrop[selected];
     const accounts = getAccounts(drop.name);
+
     const instance = instances[account];
 
     const addAcc = async () => {
@@ -249,7 +250,17 @@ export default function App() {
                         <div className="my-3">
                             <div className="mt-2">🎮 Games</div>
                             <ListGroup className="mt-2">
-                                <ListGroup.Item>😃 Coming soon</ListGroup.Item>
+                                {/*<ListGroup.Item>😃 Coming soon</ListGroup.Item>*/}
+                                {instance.games.map(v => (
+                                    <ListGroup.Item action key={v.id}
+                                                    onClick={() => loading || v.isDone ? undefined : doTask(v)}>
+                                        <Stack direction="horizontal">
+                                            <span>{v.isDone ? '✅' : '❌'} {v.title}</span>
+                                            {v.seconds !== -1 &&
+                                                <span className="ms-auto">{formatSeconds(v.seconds)}</span>}
+                                        </Stack>
+                                    </ListGroup.Item>))
+                                }
                             </ListGroup>
                         </div>
                     </>
@@ -259,7 +270,7 @@ export default function App() {
             <Stack direction="horizontal">
                 <Stack direction="vertical">
                     <p className="msg mb-2 pt-2 d-flex align-items-center">{loading &&
-                        <><img className="me-1" width={20} src="loading.svg" alt=""/>&nbsp;</>} {err}</p>
+                        <>&nbsp;<Spinner variant="primary" animation="border" size="sm"/>&nbsp;</>} {err}</p>
                     <Form.Control disabled={loading} ref={input}
                                   placeholder={(drop.tokenAuth === false ? '' : 'Auth Token or ') + 'URL'}
                                   className="mb-2"/>
