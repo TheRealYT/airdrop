@@ -49,7 +49,7 @@ export default class Major implements Airdrop {
 
         if (this.data.squad_id != null) {
             await $fetch(this.baseUrl, `api/squads/${this.data.squad_id}`, 'GET', newHeaders, headers);
-            await $fetch(this.baseUrl, `api/squads/top/position/${this.data.squad_id}`, 'GET', newHeaders, headers);
+            await $fetch(this.baseUrl, `api/squads/top/position/${this.data.squad_id}/`, 'GET', newHeaders, headers);
         }
 
         statusUpdate('Getting game info...');
