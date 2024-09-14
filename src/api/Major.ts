@@ -48,8 +48,8 @@ export default class Major implements Airdrop {
         Object.assign(this.data, await $fetch(this.baseUrl, `api/users/top/position/${this.data.user.id}/?`, 'GET', newHeaders, headers));
 
         if (this.data.squad_id != null) {
-            await $fetch(this.baseUrl, `api/squads/${this.data.squad_id}/?`, 'GET', newHeaders, headers);
-            await $fetch(this.baseUrl, `api/squads/top/position/${this.data.squad_id}/?`, 'GET', newHeaders, headers);
+            await $fetch(this.baseUrl, `api/squads/${this.data.squad_id}`, 'GET', newHeaders, headers);
+            await $fetch(this.baseUrl, `api/squads/top/position/${this.data.squad_id}`, 'GET', newHeaders, headers);
         }
 
         statusUpdate('Getting game info...');
@@ -160,6 +160,7 @@ export default class Major implements Airdrop {
                                     const reward = 5000;
                                     this.data.rating += reward;
                                     alert(`+${reward}⭐`);
+                                    return true;
                                 } else {
                                     throw new Error('Incorrect');
                                 }
@@ -197,6 +198,7 @@ export default class Major implements Airdrop {
                 if (data.success === true) {
                     this.data.rating += reward;
                     alert(`+${reward}⭐`);
+                    return true;
                 } else {
                     throw new Error('Failed to claim');
                 }
@@ -222,6 +224,7 @@ export default class Major implements Airdrop {
                 if (typeof data.rating_award == 'number') {
                     this.data.rating += data.rating_award;
                     alert(`+${data.rating_award}⭐`);
+                    return true;
                 } else {
                     throw new Error('Failed to claim');
                 }
@@ -255,6 +258,7 @@ export default class Major implements Airdrop {
                 if (data.success === true) {
                     this.data.rating += reward;
                     alert(`+${reward}⭐`);
+                    return true;
                 } else {
                     throw new Error('Failed to claim');
                 }
@@ -295,8 +299,8 @@ export default class Major implements Airdrop {
                         ...newHeaders,
                         referer: game.referer,
                     }, headers, null, false, true);
-                    await game.play();
-                    game.blocked_until = -2;
+                    if (await game.play())
+                        game.blocked_until = -2;
                 } else {
                     const now = Date.now();
                     if (game.blocked_until <= now)
