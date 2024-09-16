@@ -195,6 +195,8 @@ export default class Major implements Airdrop {
                     coins: reward,
                 });
 
+                alert('You may wait 1 minute, the choice is yours');
+
                 if (data.success === true) {
                     this.data.rating += reward;
                     alert(`+${reward}⭐`);
@@ -238,7 +240,7 @@ export default class Major implements Airdrop {
             path: 'api/swipe_coin/',
             referer: 'https://major.bot/games/swipe-coin',
             play: async () => {
-                let reward = +(prompt('Score (max 3000, min 500)') ?? '');
+                let reward = +(prompt('Score (max 3000, min 500). You may wait 1 minute, the choice is yours') ?? '');
                 if (isNaN(reward) || reward < 500)
                     throw new Error('Invalid number');
 
@@ -279,7 +281,7 @@ export default class Major implements Airdrop {
         for (let i = 0; i < this.#Games.length; i++) {
             const game = this.#Games[i];
 
-            this.data.games[i] = new Task(game.name, game.title, () => game.seconds, () => game.seconds !== -1, async () => {
+            this.data.games[i] = new Task(game.name, game.title, () => game.seconds, false, async () => {
                 if (game.blocked_until == -2) {
                     // check needed
                     const data = await $fetch(this.baseUrl, game.path, 'GET', newHeaders, headers, null, false, true);

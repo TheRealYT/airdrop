@@ -1,7 +1,7 @@
 export function formatSeconds(seconds) {
     const pad = (num) => num.toString().padStart(2, '0');
 
-    return `${pad(Math.floor(seconds / 3600))}:${pad(Math.round((seconds % 3600) / 60))}`;
+    return `${pad(Math.floor(seconds / 3600))}:${pad(Math.floor((seconds % 3600) / 60))}:${pad(Math.floor((seconds % 3600) % 60))}`;
 }
 
 function urlSafeDecode(urlencoded) {
