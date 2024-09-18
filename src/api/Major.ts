@@ -156,14 +156,17 @@ export default class Major implements Airdrop {
                                     choice_4: nums[3],
                                 });
 
-                                if (Array.isArray(data.correct) && data.correct.length === 4 && nums.findIndex((v, i) => v !== data.correct[i]) == -1) {
-                                    const reward = 5000;
-                                    this.data.rating += reward;
-                                    alert(`+${reward}⭐`);
-                                    return true;
-                                } else {
-                                    throw new Error('Incorrect');
+                                if (Array.isArray(data.correct)) {
+                                    if (data.correct.length === 4) {
+                                        const reward = 5000;
+                                        this.data.rating += reward;
+                                        alert(`+${reward}⭐`);
+                                        return true;
+                                    } else if (data.correct.length > 0) {
+                                        throw new Error(`Incorrect, correct choices ${data.correct.join(' ')}`);
+                                    }
                                 }
+                                throw new Error(`Incorrect`);
                             }
                             break;
                         }
@@ -190,12 +193,12 @@ export default class Major implements Airdrop {
 
                 const headers = {Authorization: `Bearer ${this.authToken}`};
 
+                alert('You may wait 1 minute, the choice is yours');
+
                 const reward = 915;
                 const data = await $fetch(this.baseUrl, 'api/bonuses/coins/', 'POST', newHeaders, headers, {
                     coins: reward,
                 });
-
-                alert('You may wait 1 minute, the choice is yours');
 
                 if (data.success === true) {
                     this.data.rating += reward;
