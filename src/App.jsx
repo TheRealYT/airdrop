@@ -56,12 +56,21 @@ function delAccount(dropName, token) {
     }
 }
 
+function delAllAccounts(dropName) {
+    if (dropName in data)
+        delete data[dropName];
+
+    localStorage.removeItem(dropName);
+    save();
+}
+
 const airdrops = [
     {
         img: 'hamster.webp',
         name: 'hamster',
         title: 'Hamster',
         Airdrop: Hamster,
+        msg: '🙃 Hamster Kombat ended, wasn\'t it disappointing?',
     },
     {
         size: 22,
@@ -76,7 +85,16 @@ const airdrops = [
         name: 'blum',
         title: 'Blum',
     },
-];
+].map((v) => {
+    v.n = 0;
+
+    if ('msg' in v)
+        v.n -= 2;
+    else if (!v.Airdrop)
+        v.n -= 1;
+
+    return v;
+}).sort((a, b) => b.n - a.n);
 
 const airdrop = Object.fromEntries(airdrops.map(drop => [drop.name, drop]));
 
@@ -103,15 +121,18 @@ export default function App() {
         if (!input.current)
             return;
 
+        if (!airdrop[drop.name].Airdrop)
+            return setInfo(`❌ Sorry :( ${drop.title} has no implementation`);
+
+        if ('msg' in airdrop[drop.name])
+            return setInfo(`❌ Sorry :( ${drop.title} has ended`);
+
         const token = (input.current.value ?? '').trim();
         if (token.length < 10 || token.includes(' '))
             return setInfo('❌ Invalid token');
 
         if (getAccounts(drop.name).find(v => v.token === token))
             return setInfo('❌ User already added');
-
-        if (!airdrop[drop.name].Airdrop)
-            return setInfo(`❌ Sorry :(, ${drop.title} has no implementation`);
 
         const instance = new airdrop[drop.name].Airdrop();
         setLoading(true);
@@ -177,6 +198,12 @@ export default function App() {
         }
     };
 
+
+    const delAllAcc = () => {
+        delAllAccounts(drop.name);
+        setR(r => !r);
+    };
+
     const refresh = async () => {
         if (account !== '')
             await loadInstance(account, true);
@@ -199,24 +226,31 @@ export default function App() {
                                 {d.img &&
                                     <img className="me-1" width={d.size ?? 20} src={d.img}
                                          alt=""/>}{d.title}
-                                {isNew(d.Airdrop && d.name, drop.name) && <span className="text-danger ms-1">●</span>}
+                                {isNew(d.Airdrop && !('msg' in d) && d.name, drop.name) &&
+                                    <span className="text-danger ms-1">●</span>}
                             </Button>);
                     })}
                 </Stack>
             </div>
 
             <div className="pt-2 overflow-y-auto flex-grow-1">
-                {drop.Airdrop ? (accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`) : '😃 Coming soon'}
+                {'msg' in drop ? drop.msg : (drop.Airdrop ? (accounts.length === 0 ? 'No account found' : `${accounts.length} account(s) found`) : '😃 Coming soon')}
 
-                {accounts.length > 0 && <Stack direction="horizontal" gap={2} className="mt-2">
-                    <Form.Select onChange={onAccountSelected} disabled={loading}>
-                        <option></option>
-                        {accounts.map(({token, name}, i) => (
-                            <option key={token} value={token}>{(i + 1) + ' ' + name}</option>))}
-                    </Form.Select>
-                    <Button disabled={loading} onClick={refresh}>⁐</Button>
-                    <Button disabled={loading} variant="danger" onClick={delAcc}>X</Button>
-                </Stack>}
+                {accounts.length > 0 && ('msg' in drop ? <><Stack direction="horizontal" gap={2} className="mt-2">
+                        <ol>
+                            {accounts.map(({token, name}) => (
+                                <li key={token}>{name}</li>))}
+                        </ol>
+                    </Stack><Button disabled={loading} variant="danger" onClick={delAllAcc}>Clean Data</Button></> :
+                    <Stack direction="horizontal" gap={2} className="mt-2">
+                        <Form.Select onChange={onAccountSelected} disabled={loading}>
+                            <option></option>
+                            {accounts.map(({token, name}, i) => (
+                                <option key={token} value={token}>{(i + 1) + ' ' + name}</option>))}
+                        </Form.Select>
+                        <Button disabled={loading} onClick={refresh}>⁐</Button>
+                        <Button disabled={loading} variant="danger" onClick={delAcc}>X</Button>
+                    </Stack>)}
 
                 {instance &&
                     <>
