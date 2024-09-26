@@ -1,7 +1,9 @@
 import {Button, Form, ListGroup, Spinner, Stack} from 'react-bootstrap';
-import {useRef, useState} from 'react';
-import Hamster from './api/Hamster';
+
+import React, {useRef, useState} from 'react';
 import {formatSeconds} from './api/util';
+
+import Hamster from './api/Hamster';
 import Major from './api/Major';
 
 const data = JSON.parse(localStorage.getItem('data')) ?? {};
@@ -214,21 +216,26 @@ export default function App() {
             <div className="w-100 overflow-y-auto topBar" style={{flex: 'none'}}>
                 <Stack direction="horizontal" className="mb-2 px-2" style={{width: 'max-content'}}
                        gap={2}>
-                    {airdrops.map(d => {
+                    {airdrops.map((d, i, arr) => {
                         const onClick = () => {
                             setSelected(d.name);
                             setAccount('');
                         };
 
                         return (
-                            <Button disabled={loading} onClick={onClick}
+                            <React.Fragment key={d.name}>
+                                {i > 0 && ((arr[i - 1].Airdrop && !d.Airdrop) || (!('msg' in arr[i - 1]) && 'msg' in d)) &&
+                                    <div key={d.Airdrop ? 'divider-end' : 'divider-new'} className="divider-h"/>}
+                                <Button
+                                    disabled={loading} onClick={onClick}
                                     key={d.name} variant={d.name === selected ? 'primary' : 'light'}>
-                                {d.img &&
-                                    <img className="me-1" width={d.size ?? 20} src={d.img}
-                                         alt=""/>}{d.title}
-                                {isNew(d.Airdrop && !('msg' in d) && d.name, drop.name) &&
-                                    <span className="text-danger ms-1">●</span>}
-                            </Button>);
+                                    {d.img &&
+                                        <img className="me-1" width={d.size ?? 20} src={d.img}
+                                             alt=""/>}{d.title}
+                                    {isNew(d.Airdrop && !('msg' in d) && d.name, drop.name) &&
+                                        <span className="text-danger ms-1">●</span>}
+                                </Button>
+                            </React.Fragment>);
                     })}
                 </Stack>
             </div>
@@ -284,7 +291,6 @@ export default function App() {
                         <div className="my-3">
                             <div className="mt-2">🎮 Games</div>
                             <ListGroup className="mt-2">
-                                {/*<ListGroup.Item>😃 Coming soon</ListGroup.Item>*/}
                                 {instance.games.map(v => (
                                     <ListGroup.Item action key={v.id}
                                                     onClick={() => loading || v.isDone ? undefined : doTask(v)}>

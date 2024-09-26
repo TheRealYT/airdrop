@@ -28,3 +28,10 @@ body {
     border-radius: 8px;
     z-index: 1;
 }
+
+.divider-h {
+    width: 5px;
+    height: 15px;
+    background-color: #919191;
+    border-radius: 10px;
+}
